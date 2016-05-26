@@ -1,0 +1,33 @@
+group 'com.ridog'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'jetty'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
+    compile 'org.springframework:spring-webmvc:4.1.6.RELEASE'
+    compile 'com.qiniu:qiniu-java-sdk:7.0.+'
+    compile 'org.projectlombok:lombok:1.16.8'
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+}
+
+// Embeded Jetty for testing
+jettyRun{
+    contextPath = "/"
+    httpPort = 8080
+}
+
+jettyRunWar{
+    contextPath = "/"
+    httpPort = 8080
+}
