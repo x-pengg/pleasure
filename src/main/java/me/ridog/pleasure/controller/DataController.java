@@ -1,11 +1,13 @@
 package me.ridog.pleasure.controller;
 
+import com.google.gson.Gson;
 import me.ridog.pleasure.service.DataService;
+import me.ridog.pleasure.util.qiniu.QiNiuPicResp;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author: Tate
@@ -18,9 +20,10 @@ public class DataController {
     private DataService dataService;
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public void uploadTest(MultipartFile ... file) {
-        for (MultipartFile multipartFile : file) {
-            dataService.uploadFile(multipartFile);
-        }
+    @ResponseBody
+    public String uploadTest(@RequestParam("files") MultipartFile[] files) {
+        List<QiNiuPicResp> qiNiuPicResp = dataService.uploadPicToQiNiu(files);
+        return new Gson().toJson(qiNiuPicResp);
     }
+
 }

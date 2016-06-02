@@ -9,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 /**
  * @author: Tate
@@ -24,15 +28,28 @@ public class DataService {
 
     private static final Logger logger = LoggerFactory.getLogger(DataService.class);
 
-    public QiNiuPicResp uploadFile(MultipartFile multipartFile) {
-        String key = UUID.randomUUID().toString();
-        QiNiuPicResp upload = null;
+    public List<QiNiuPicResp> uploadPicToQiNiu(MultipartFile[] files) {
+        List<QiNiuPicResp> resList = null;
         try {
-            upload = qiNiuUtil.upload(multipartFile.getBytes(), key);
-        } catch (IOException e) {
+            List<FutureTask<QiNiuPicResp>> fList = new ArrayList<FutureTask<QiNiuPicResp>>();
+            for (MultipartFile file : files) {
+                FutureTask<QiNiuPicResp> futureTask = new FutureTask<QiNiuPicResp>(new Callable<QiNiuPicResp>() {
+                    @Override
+                    public QiNiuPicResp call() throws Exception {
+                        return qiNiuUtil.upload(file.getBytes(), UUID.randomUUID().toString());
+                    }
+                });
+                fList.add(futureTask);
+                new Thread(futureTask).start();
+            }
+            resList = new ArrayList<>();
+            for (FutureTask<QiNiuPicResp> futureTask : fList) {
+                resList.add(futureTask.get());
+            }
+        } catch (Exception e) {
             logger.error("上传文件错误", e);
         }
-        return upload;
+        return resList;
     }
 
 }
